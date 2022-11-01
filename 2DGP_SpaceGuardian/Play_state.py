@@ -19,12 +19,13 @@ FPS = 60
 battleship = None
 fires = None
 rocks = None
+items = None
 Ocur_Rock = 1
 Rock_Speed = 1
 Max_Speed = 2
 destroied_rock = 0
 count_miss = 0
-
+fire_num = 2
 
 #클레스
 
@@ -192,6 +193,25 @@ class Rock(pygame.sprite.Sprite):
         if self.rect.y > SCREEN_HEIGHT:
             return True
 
+class Item(pygame.sprite.Sprite):
+
+    def __init__(self, xpos, ypos, speed):
+        super(Item, self).__init__()
+        self.Item01 = pygame.image.load('item.png')
+        self.image = self.Item01
+        self.rect = self.image.get_rect()
+        self.rect.x = xpos
+        self.rect.y = ypos
+        self.speed = speed
+
+    def update(self):
+        self.rect.y += self.speed
+
+
+
+
+
+
 
 def game_logic():
     global Ocur_Rock, Rock_Speed, Max_Speed, destroied_rock, count_miss
@@ -203,13 +223,22 @@ def game_logic():
             rock = Rock(random.randint(30, SCREEN_WIDTH - 30), 0, speed)
             rocks.add(rock)
 
+
+# 미사일과 돌이 충돌시 돌과 미사일을 지워줌
     for fire in fires:
         rock = fire.colide(rocks)
         if rock:
             destroied_rock += 1
             fire.kill()
             rock.kill()
+            if rock.image == rock.G_rock:
+                speed = 2
+                item = Item(rock.rect.x, rock.rect.y, speed)
+                items.add(item)
 
+
+
+#화면 밖으로 나간돌의 처리
     for rock in rocks:
         if rock.Count_miss_rock():
             rock.kill()
@@ -228,12 +257,12 @@ def draw_text(screen, text, font, x, y, color):
 pygame.init()
 
 def enter():
-    global battleship, fires, rocks
+    global battleship, fires, rocks, items
 
     battleship = BattleShip()
     fires = pygame.sprite.Group()
     rocks = pygame.sprite.Group()
-
+    items = pygame.sprite.Group()
 
 def exit():
     global battleship, fires, rocks
@@ -242,6 +271,8 @@ def exit():
     del rocks
 
 def handle_events():
+    global fire_num
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_framework.quit()
@@ -260,8 +291,15 @@ def handle_events():
                 battleship.direction = "down"
                 battleship.state = 4
             elif event.key == pygame.K_SPACE:
-                fire = Fire(battleship.rect.centerx, battleship.rect.y, 10)
-                fires.add(fire)
+                if fire_num == 1:
+                    fire = Fire(battleship.rect.centerx, battleship.rect.y, 10)
+                    fires.add(fire)
+                elif fire_num == 2:
+                    fire01 = Fire(battleship.rect.centerx - 25, battleship.rect.y, 10)
+                    fire02 = Fire(battleship.rect.centerx + 5, battleship.rect.y, 10)
+                    fires.add(fire01)
+                    fires.add(fire02)
+
             elif event.key == pygame.K_ESCAPE:
                 game_framework.push_state(Pause_state)
 
@@ -280,6 +318,7 @@ def update():
     battleship.update()
     fires.update()
     rocks.update()
+    items.update()
     game_logic()
 
 
@@ -298,6 +337,7 @@ def draw_world():
 
     rocks.draw(screen)
     fires.draw(screen)
+    items.draw(screen)
     battleship.draw(screen)
     clock.tick(FPS)
 def draw():
