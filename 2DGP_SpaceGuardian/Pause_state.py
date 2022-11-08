@@ -34,6 +34,11 @@ def handle_events():
         elif event.type == pygame.KEYDOWN:
             match event.key:
                 case pygame.K_1:
+                    Play_state.rocks.empty()
+                    Play_state.battleship.reset()
+                    Play_state.destroied_rock = 0
+                    Play_state.count_miss = 0
+                    Play_state.fire_num = 1
                     game_framework.change_state(title_state)
                 case pygame.K_2:
                     game_framework.pop_state()

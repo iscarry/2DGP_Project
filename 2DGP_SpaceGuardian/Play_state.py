@@ -25,7 +25,7 @@ Rock_Speed = 1
 Max_Speed = 2
 destroied_rock = 0
 count_miss = 0
-fire_num = 2
+fire_num = 1
 
 #클레스
 
@@ -138,8 +138,10 @@ class BattleShip(pygame.sprite.Sprite):
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
-    def colide(self):
-        pass
+    def collide(self, sprites):
+        for sprite in sprites:
+            if pygame.sprite.collide_rect(self, sprite):
+                return sprite
 
 
 
@@ -174,7 +176,7 @@ class Rock(pygame.sprite.Sprite):
         elif self.image == 2:
             self.image = self.U_Rock
         else:
-            if random.randint(1, 10) == 1:
+            if random.randint(1, 2) == 1:
                 self.image = self.G_rock
             else:
                 self.image = self.rock01
@@ -207,16 +209,68 @@ class Item(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.speed
 
+    # def collide(self, sprites):
+    #     for sprite in sprites:
+    #         if pygame.sprite.collide_rect(self, battleship):
+    #             fire_num += 1
+    #             return sprite
+
+def draw_text(screen, text, font, x, y, color):
+    text_obj = font.render(text, True, color)
+    text_rect = text_obj.get_rect()
+    text_rect.center = x, y
+    screen.blit(text_obj, text_rect)
 
 
+def occur_explosion(screen, x, y):
+
+    explosion_image = []
+    explosion_image.append(pygame.image.load('explosion01.png'))
+    explosion_image.append(pygame.image.load('explosion02.png'))
+    explosion_image.append(pygame.image.load('explosion03.png'))
+    explosion_image.append(pygame.image.load('explosion04.png'))
+    explosion_image.append(pygame.image.load('explosion05.png'))
+    explosion_image.append(pygame.image.load('explosion06.png'))
+    explosion_image.append(pygame.image.load('explosion07.png'))
+    explosion_image.append(pygame.image.load('explosion08.png'))
+    explosion_image.append(pygame.image.load('explosion09.png'))
+    explosion_image.append(pygame.image.load('explosion10.png'))
+    explosion_image.append(pygame.image.load('explosion11.png'))
+    explosion_image.append(pygame.image.load('explosion12.png'))
+    explosion_image.append(pygame.image.load('explosion13.png'))
+    explosion_image.append(pygame.image.load('explosion14.png'))
+    explosion_image.append(pygame.image.load('explosion15.png'))
+
+    current_time = 0
+    clock = pygame.time.Clock()
+    frame = round(100 / len(explosion_image * 100), 2)
+    current_time += clock.tick(FPS)
+    index = 0
+    count = 15
+
+    if current_time >= frame:
+        current_time = 0
+        index = (index % count)
+        image = explosion_image[index]
+        index += 1
+
+        if index >= len(explosion_image):
+            index = 0
+
+    explosion_rect = image.get_rect()
+    explosion_rect.x = x
+    explosion_rect.y = y
+    screen.blit(image, explosion_rect)
+    pygame.display.flip()
 
 
 
 
 def game_logic():
-    global Ocur_Rock, Rock_Speed, Max_Speed, destroied_rock, count_miss
+    global Ocur_Rock, Rock_Speed, Max_Speed, destroied_rock, count_miss, fire_num
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-
+# 암석이 랜덤으로 뿌려줌
     if random.randint(1, 60) == 1:
         for i in range(Ocur_Rock):
             speed = random.randint(Rock_Speed, Max_Speed)
@@ -228,6 +282,7 @@ def game_logic():
     for fire in fires:
         rock = fire.colide(rocks)
         if rock:
+            occur_explosion(screen, rock.rect.x, rock.rect.y)
             destroied_rock += 1
             fire.kill()
             rock.kill()
@@ -244,15 +299,22 @@ def game_logic():
             rock.kill()
             count_miss += 1
 
-
-def draw_text(screen, text, font, x, y, color):
-    text_obj = font.render(text, True, color)
-    text_rect = text_obj.get_rect()
-    text_rect.center = x, y
-    screen.blit(text_obj, text_rect)
-
-
-
+# 운석과 충돌 하거나 운석을 3번 놓치면 게임 오버
+    if battleship.collide(rocks) or count_miss >= 3:
+        occur_explosion(screen, battleship.rect.x, battleship.rect.y)
+        rocks.empty()
+        battleship.reset()
+        destroied_rock = 0
+        count_miss = 0
+        fire_num = 1
+        game_framework.change_state(title_state)
+        sleep(1)
+# 아이템을 먹었을 때 발사체 수 증가
+    for item in items:
+        if battleship.collide(items):
+            if fire_num < 5:
+                fire_num += 1
+            item.kill()
 
 pygame.init()
 
@@ -292,13 +354,41 @@ def handle_events():
                 battleship.state = 4
             elif event.key == pygame.K_SPACE:
                 if fire_num == 1:
-                    fire = Fire(battleship.rect.centerx, battleship.rect.y, 10)
+                    fire = Fire(battleship.rect.centerx - 10, battleship.rect.y, 10)
                     fires.add(fire)
                 elif fire_num == 2:
                     fire01 = Fire(battleship.rect.centerx - 25, battleship.rect.y, 10)
                     fire02 = Fire(battleship.rect.centerx + 5, battleship.rect.y, 10)
                     fires.add(fire01)
                     fires.add(fire02)
+                elif fire_num == 3:
+                    fire01 = Fire(battleship.rect.centerx + 5, battleship.rect.y, 10)
+                    fire02 = Fire(battleship.rect.centerx - 15, battleship.rect.y, 10)
+                    fire03 = Fire(battleship.rect.centerx - 35, battleship.rect.y, 10)
+                    fires.add(fire01)
+                    fires.add(fire02)
+                    fires.add(fire03)
+                elif fire_num == 4:
+                    fire01 = Fire(battleship.rect.centerx + 15, battleship.rect.y, 10)
+                    fire02 = Fire(battleship.rect.centerx - 5, battleship.rect.y, 10)
+                    fire03 = Fire(battleship.rect.centerx - 25, battleship.rect.y, 10)
+                    fire04 = Fire(battleship.rect.centerx - 45, battleship.rect.y, 10)
+                    fires.add(fire01)
+                    fires.add(fire02)
+                    fires.add(fire03)
+                    fires.add(fire04)
+                elif fire_num == 5:
+                    fire01 = Fire(battleship.rect.centerx + 25, battleship.rect.y, 10)
+                    fire02 = Fire(battleship.rect.centerx + 5, battleship.rect.y, 10)
+                    fire03 = Fire(battleship.rect.centerx - 15, battleship.rect.y, 10)
+                    fire04 = Fire(battleship.rect.centerx - 35, battleship.rect.y, 10)
+                    fire05 = Fire(battleship.rect.centerx - 55, battleship.rect.y, 10)
+                    fires.add(fire01)
+                    fires.add(fire02)
+                    fires.add(fire03)
+                    fires.add(fire04)
+                    fires.add(fire05)
+
 
             elif event.key == pygame.K_ESCAPE:
                 game_framework.push_state(Pause_state)
