@@ -1,11 +1,14 @@
 import pygame
-import os
-import sys
 import random
 from time import sleep
 import game_framework
 import title_state
 import Pause_state
+from Battleship_H import BattleShip
+from Fire_H import Fire
+from Rock_H import Rock
+from Item_H import Item
+from Boss_H import Boss
 
 # 정의
 SCREEN_WIDTH = 480
@@ -20,200 +23,15 @@ battleship = None
 fires = None
 rocks = None
 items = None
+boss = None
 Ocur_Rock = 1
 Rock_Speed = 1
 Max_Speed = 2
 destroied_rock = 0
 count_miss = 0
 fire_num = 1
+unit_fall = True
 
-#클레스
-
-class BattleShip(pygame.sprite.Sprite):
-    def __init__(self):
-        super(BattleShip, self).__init__()
-        self.images = []
-        # 0 가만히 있는 상태
-        self.images.append(pygame.image.load('Battleship.png'))
-        # 1 ~ 2 오른쪽 움직임
-        self.images.append(pygame.image.load('Battleship_R1.png'))
-        self.images.append(pygame.image.load('Battleship_R2.png'))
-        # 3 ~ 4 왼쪽 움직임
-        self.images.append(pygame.image.load('Battleship_L1.png'))
-        self.images.append(pygame.image.load('Battleship_L2.png'))
-        # 5 ~ 6 위쪽 움직임
-        self.images.append(pygame.image.load('Battleship_U1.png'))
-        self.images.append(pygame.image.load('Battleship_U2.png'))
-        # 7 ~ 8 아래쪽 움직임
-        self.images.append(pygame.image.load('Battleship_D1.png'))
-        self.images.append(pygame.image.load('Battleship_D2.png'))
-
-        self.images_stay = self.images
-        self.images_right = self.images
-        self.images_left = self.images
-        self.images_up = self.images
-        self.images_down = self.images
-        self.state = 0
-        self.direction = 'stay'
-        self.velocity_x = 0
-        self.velocity_y = 0
-        self.index = 0
-        self.image = self.images[self.index]
-        self.rect = self.image.get_rect()
-        self.frame = round(100 / len(self.images*100), 2)
-        self.current_time = 0
-        self.clock = pygame.time.Clock()
-        self.reset()
-
-    def reset(self):
-        self.rect.x = (SCREEN_WIDTH * 0.4)
-        self.rect.y = (SCREEN_HEIGHT * 0.8)
-    def update(self):
-
-        # 상태를 처리
-        if self.state == 0:
-            count = 1
-            start_index = 0
-            self.velocity_x = 0
-            self.velocity_y = 0
-        elif self.state == 1:
-            count = 2
-            start_index = 1
-            self.velocity_x = 5
-            self.velocity_y = 0
-        elif self.state == 2:
-            count = 2
-            start_index = 3
-            self.velocity_x = 5
-            self.velocity_y = 0
-
-        elif self.state == 3:
-            count = 2
-            start_index = 5
-            self.velocity_x = 0
-            self.velocity_y = 5
-
-        elif self.state == 4:
-            count = 2
-            start_index = 7
-            self.velocity_x = 0
-            self.velocity_y = 5
-
-
-        if self.direction == 'stay':
-            self.images = self.images_stay
-        elif self.direction == 'right':
-            self.images = self.images_right
-        elif self.direction == 'left':
-            self.images = self.images_left
-            self.velocity_x = abs(self.velocity_x) * -1
-        elif self.direction == 'up':
-            self.images = self.images_up
-            self.velocity_y = abs(self.velocity_y) * -1
-        elif self.direction == 'down':
-            self.images = self.images_down
-
-        self.current_time += self.clock.tick(FPS)
-
-        if self.current_time >= self.frame:
-            self.current_time = 0
-
-            self.index = (self.index % count) + start_index
-            self.image = self.images[self.index]
-            self.index += 1
-
-            if self.index >= len(self.images):
-                self.index = 0
-
-        self.rect.x += self.velocity_x
-        self.rect.y += self.velocity_y
-
-        # 스크린에서 나가지 않게 해주는 코드
-        if self.rect.x < 0 or self.rect.x + self.rect.width > SCREEN_WIDTH:
-            self.rect.x -= self.velocity_x
-
-        if self.rect.y < 0 or self.rect.y + self.rect.height > SCREEN_HEIGHT:
-            self.rect.y -= self.velocity_y
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
-    def collide(self, sprites):
-        for sprite in sprites:
-            if pygame.sprite.collide_rect(self, sprite):
-                return sprite
-
-
-
-class Fire(pygame.sprite.Sprite):
-    def __init__(self, xpos, ypos, speed):
-        super(Fire, self).__init__()
-        self.image = pygame.image.load('Fire.png')
-        self.rect = self.image.get_rect()
-        self.rect.x = xpos
-        self.rect.y = ypos
-        self.speed = speed
-
-    def update(self):
-        self.rect.y -= self.speed
-
-    def colide(self, sprites):
-        for sprite in sprites:
-            if pygame.sprite.collide_rect(self, sprite):
-                return sprite
-
-
-class Rock(pygame.sprite.Sprite):
-    def __init__(self, xpos, ypos, speed):
-        super(Rock, self).__init__()
-        self.rock01 = pygame.image.load('Rock01.png')
-        self.G_rock = pygame.image.load('G_Rock.png')
-        self.U_Rock = pygame.image.load('unique_rock.png')
-
-        self.image = random.randint(1, 3)
-        if self.image == 1:
-            self.image = self.rock01
-        elif self.image == 2:
-            self.image = self.U_Rock
-        else:
-            if random.randint(1, 2) == 1:
-                self.image = self.G_rock
-            else:
-                self.image = self.rock01
-
-        self.rect = self.image.get_rect()
-        self.rect.x = xpos
-        self.rect.y = ypos
-        self.speed = speed
-
-
-
-    def update(self):
-        self.rect.y += self.speed
-
-    def Count_miss_rock(self):
-        if self.rect.y > SCREEN_HEIGHT:
-            return True
-
-class Item(pygame.sprite.Sprite):
-
-    def __init__(self, xpos, ypos, speed):
-        super(Item, self).__init__()
-        self.Item01 = pygame.image.load('item.png')
-        self.image = self.Item01
-        self.rect = self.image.get_rect()
-        self.rect.x = xpos
-        self.rect.y = ypos
-        self.speed = speed
-
-    def update(self):
-        self.rect.y += self.speed
-
-    # def collide(self, sprites):
-    #     for sprite in sprites:
-    #         if pygame.sprite.collide_rect(self, battleship):
-    #             fire_num += 1
-    #             return sprite
 
 def draw_text(screen, text, font, x, y, color):
     text_obj = font.render(text, True, color)
@@ -222,67 +40,28 @@ def draw_text(screen, text, font, x, y, color):
     screen.blit(text_obj, text_rect)
 
 
-def occur_explosion(screen, x, y):
-
-    explosion_image = []
-    explosion_image.append(pygame.image.load('explosion01.png'))
-    explosion_image.append(pygame.image.load('explosion02.png'))
-    explosion_image.append(pygame.image.load('explosion03.png'))
-    explosion_image.append(pygame.image.load('explosion04.png'))
-    explosion_image.append(pygame.image.load('explosion05.png'))
-    explosion_image.append(pygame.image.load('explosion06.png'))
-    explosion_image.append(pygame.image.load('explosion07.png'))
-    explosion_image.append(pygame.image.load('explosion08.png'))
-    explosion_image.append(pygame.image.load('explosion09.png'))
-    explosion_image.append(pygame.image.load('explosion10.png'))
-    explosion_image.append(pygame.image.load('explosion11.png'))
-    explosion_image.append(pygame.image.load('explosion12.png'))
-    explosion_image.append(pygame.image.load('explosion13.png'))
-    explosion_image.append(pygame.image.load('explosion14.png'))
-    explosion_image.append(pygame.image.load('explosion15.png'))
-
-    current_time = 0
-    clock = pygame.time.Clock()
-    frame = round(100 / len(explosion_image * 100), 2)
-    current_time += clock.tick(FPS)
-    index = 0
-    count = 15
-
-    if current_time >= frame:
-        current_time = 0
-        index = (index % count)
-        image = explosion_image[index]
-        index += 1
-
-        if index >= len(explosion_image):
-            index = 0
-
-    explosion_rect = image.get_rect()
-    explosion_rect.x = x
-    explosion_rect.y = y
-    screen.blit(image, explosion_rect)
-    pygame.display.flip()
-
 
 
 
 def game_logic():
-    global Ocur_Rock, Rock_Speed, Max_Speed, destroied_rock, count_miss, fire_num
+    global Ocur_Rock, Rock_Speed, Max_Speed, destroied_rock, count_miss, fire_num, unit_fall, boss
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # 암석이 랜덤으로 뿌려줌
-    if random.randint(1, 60) == 1:
-        for i in range(Ocur_Rock):
-            speed = random.randint(Rock_Speed, Max_Speed)
-            rock = Rock(random.randint(30, SCREEN_WIDTH - 30), 0, speed)
-            rocks.add(rock)
-
+    if unit_fall == True:
+        if random.randint(1, 60) == 1:
+            for i in range(Ocur_Rock):
+                speed = random.randint(Rock_Speed, Max_Speed)
+                rock = Rock(random.randint(30, SCREEN_WIDTH - 30), 0, speed)
+                rocks.add(rock)
+# 보스 등장
 
 # 미사일과 돌이 충돌시 돌과 미사일을 지워줌
     for fire in fires:
         rock = fire.colide(rocks)
+        boss_c = boss.collide(fires)
         if rock:
-            occur_explosion(screen, rock.rect.x, rock.rect.y)
+            #Fire.occur_explosion(screen, rock.rect.x, rock.rect.y)
             destroied_rock += 1
             fire.kill()
             rock.kill()
@@ -291,6 +70,10 @@ def game_logic():
                 item = Item(rock.rect.x, rock.rect.y, speed)
                 items.add(item)
 
+            if boss_c:
+                # Fire.occur_explosion(screen, boss_c.rect.x, boss_c.rect.y)
+                fire.kill()
+
 
 
 #화면 밖으로 나간돌의 처리
@@ -298,10 +81,14 @@ def game_logic():
         if rock.Count_miss_rock():
             rock.kill()
             count_miss += 1
+# 회면 밖으로 나간 미사일 처리
+    for fire in fires:
+        if fire.miss_fire():
+            fire.kill()
 
 # 운석과 충돌 하거나 운석을 3번 놓치면 게임 오버
     if battleship.collide(rocks) or count_miss >= 3:
-        occur_explosion(screen, battleship.rect.x, battleship.rect.y)
+        Fire.occur_explosion(screen, battleship.rect.x, battleship.rect.y)
         rocks.empty()
         battleship.reset()
         destroied_rock = 0
@@ -309,6 +96,7 @@ def game_logic():
         fire_num = 1
         game_framework.change_state(title_state)
         sleep(1)
+
 # 아이템을 먹었을 때 발사체 수 증가
     for item in items:
         if battleship.collide(items):
@@ -316,21 +104,25 @@ def game_logic():
                 fire_num += 1
             item.kill()
 
+
+
 pygame.init()
 
 def enter():
-    global battleship, fires, rocks, items
+    global battleship, fires, rocks, items, boss
 
     battleship = BattleShip()
     fires = pygame.sprite.Group()
     rocks = pygame.sprite.Group()
     items = pygame.sprite.Group()
+    boss = Boss()
 
 def exit():
-    global battleship, fires, rocks
+    global battleship, fires, rocks, boss
     del battleship
     del fires
     del rocks
+    del boss
 
 def handle_events():
     global fire_num
@@ -410,13 +202,15 @@ def update():
     rocks.update()
     items.update()
     game_logic()
+    if destroied_rock >= 10:
+        boss.update()
 
 
 def draw_world():
-    global destroied_rock, count_miss
+    global destroied_rock, count_miss, unit_fall
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption('Space_Guardian')
-    background_image = pygame.image.load('background.png')
+    background_image = pygame.image.load('sprite/background.png')
     default_font = pygame.font.Font(None, 28)
     clock = pygame.time.Clock()
     screen.blit(background_image, background_image.get_rect())
@@ -425,10 +219,15 @@ def draw_world():
     draw_text(screen, 'Missed Meteorite: {}'.format(count_miss),
               default_font, 340, 20, RED)
 
+    if destroied_rock >= 10:
+        unit_fall = False
+        boss.draw(screen)
+
     rocks.draw(screen)
     fires.draw(screen)
     items.draw(screen)
     battleship.draw(screen)
+    #boss.draw(screen)
     clock.tick(FPS)
 def draw():
     draw_world()

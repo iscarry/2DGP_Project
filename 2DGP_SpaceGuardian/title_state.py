@@ -17,7 +17,7 @@ def draw_text(screen, text, font, x, y, color):
 
 def enter():
     global image
-    image = pygame.image.load('menu_BG.png')
+    image = pygame.image.load('sprite/menu_BG.png')
 
 
 

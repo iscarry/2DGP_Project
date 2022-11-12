@@ -10,7 +10,7 @@ WHITE = (200, 200, 200)
 
 def enter():
     global image
-    image = pygame.image.load('Pause.png')
+    image = pygame.image.load('sprite/Pause.png')
 
 def exit():
     global image
