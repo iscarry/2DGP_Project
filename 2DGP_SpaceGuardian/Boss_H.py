@@ -1,5 +1,5 @@
 import pygame
-
+from Fire_H import Fire
 class Boss(pygame.sprite.Sprite):
     def __init__(self):
         super(Boss, self).__init__()
@@ -20,8 +20,6 @@ class Boss(pygame.sprite.Sprite):
     def collide(self, sprites):
         for sprite in sprites:
             if pygame.sprite.collide_rect(self, sprite):
-                self.HP -= 1
-                if self.HP == 0:
-                    return sprite
+                return sprite
 
 

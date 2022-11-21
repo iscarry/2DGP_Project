@@ -24,13 +24,14 @@ fires = None
 rocks = None
 items = None
 boss = None
-Ocur_Rock = 1
+Occur_Rock = 1
 Rock_Speed = 1
 Max_Speed = 2
-destroied_rock = 0
+destroyed_rock = 0
 count_miss = 0
 fire_num = 1
 unit_fall = True
+rocks_count = 0
 
 
 def draw_text(screen, text, font, x, y, color):
@@ -44,42 +45,40 @@ def draw_text(screen, text, font, x, y, color):
 
 
 def game_logic():
-    global Ocur_Rock, Rock_Speed, Max_Speed, destroied_rock, count_miss, fire_num, unit_fall, boss
+    global Occur_Rock, Rock_Speed, Max_Speed, destroyed_rock, count_miss, fire_num, unit_fall, boss, rocks_count
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # 암석이 랜덤으로 뿌려줌
     if unit_fall == True:
         if random.randint(1, 60) == 1:
-            for i in range(Ocur_Rock):
+            for i in range(Occur_Rock):
                 speed = random.randint(Rock_Speed, Max_Speed)
                 rock = Rock(random.randint(30, SCREEN_WIDTH - 30), 0, speed)
                 rocks.add(rock)
+                rocks_count += 1
 # 보스 등장
 
 # 미사일과 돌이 충돌시 돌과 미사일을 지워줌
     for fire in fires:
         rock = fire.colide(rocks)
-        boss_c = boss.collide(fires)
+
         if rock:
             #Fire.occur_explosion(screen, rock.rect.x, rock.rect.y)
-            destroied_rock += 1
+            destroyed_rock += 1
             fire.kill()
             rock.kill()
+            rocks_count -= 1
             if rock.image == rock.G_rock:
                 speed = 2
                 item = Item(rock.rect.x, rock.rect.y, speed)
                 items.add(item)
-
-            if boss_c:
-                # Fire.occur_explosion(screen, boss_c.rect.x, boss_c.rect.y)
-                fire.kill()
-
 
 
 #화면 밖으로 나간돌의 처리
     for rock in rocks:
         if rock.Count_miss_rock():
             rock.kill()
+            rocks_count -= 1
             count_miss += 1
 # 회면 밖으로 나간 미사일 처리
     for fire in fires:
@@ -91,11 +90,19 @@ def game_logic():
         Fire.occur_explosion(screen, battleship.rect.x, battleship.rect.y)
         rocks.empty()
         battleship.reset()
-        destroied_rock = 0
+        destroyed_rock = 0
         count_miss = 0
         fire_num = 1
         game_framework.change_state(title_state)
         sleep(1)
+
+    if destroyed_rock >= 10 and rocks_count == 0:
+        if boss.collide(fires):
+            fire.kill()
+
+
+
+
 
 # 아이템을 먹었을 때 발사체 수 증가
     for item in items:
@@ -181,7 +188,6 @@ def handle_events():
                     fires.add(fire04)
                     fires.add(fire05)
 
-
             elif event.key == pygame.K_ESCAPE:
                 game_framework.push_state(Pause_state)
 
@@ -202,26 +208,27 @@ def update():
     rocks.update()
     items.update()
     game_logic()
-    if destroied_rock >= 10:
+    if destroyed_rock >= 10 and rocks_count == 0:
         boss.update()
 
 
 def draw_world():
-    global destroied_rock, count_miss, unit_fall
+    global destroyed_rock, count_miss, unit_fall
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption('Space_Guardian')
     background_image = pygame.image.load('sprite/background.png')
     default_font = pygame.font.Font(None, 28)
     clock = pygame.time.Clock()
     screen.blit(background_image, background_image.get_rect())
-    draw_text(screen, 'Destroyed Meteorite: {}'.format(destroied_rock),
+    draw_text(screen, 'Destroyed Meteorite: {}'.format(destroyed_rock),
               default_font, 110, 20, YELLOW)
     draw_text(screen, 'Missed Meteorite: {}'.format(count_miss),
               default_font, 340, 20, RED)
 
-    if destroied_rock >= 10:
+    if destroyed_rock >= 10:
         unit_fall = False
-        boss.draw(screen)
+        if rocks_count == 0:
+            boss.draw(screen)
 
     rocks.draw(screen)
     fires.draw(screen)
