@@ -119,3 +119,7 @@ class BattleShip(pygame.sprite.Sprite):
             if pygame.sprite.collide_rect(self, sprite):
                 return sprite
 
+    def collide_boss(self, sprite):
+        if pygame.sprite.collide_rect(self, sprite):
+            return sprite
+

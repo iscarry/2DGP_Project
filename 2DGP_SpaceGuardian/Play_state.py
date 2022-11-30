@@ -45,7 +45,7 @@ def draw_text(screen, text, font, x, y, color):
 
 
 def game_logic():
-    global Occur_Rock, Rock_Speed, Max_Speed, destroyed_rock, count_miss, fire_num, unit_fall, boss, rocks_count
+    global battleship, Occur_Rock, Rock_Speed, Max_Speed, destroyed_rock, count_miss, fire_num, unit_fall, boss, rocks_count
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # 암석이 랜덤으로 뿌려줌
@@ -91,6 +91,7 @@ def game_logic():
         rocks.empty()
         battleship.reset()
         destroyed_rock = 0
+        rocks_count = 0
         count_miss = 0
         fire_num = 1
         game_framework.change_state(title_state)
@@ -100,9 +101,16 @@ def game_logic():
         if boss.collide(fires):
             fire.kill()
 
-
-
-
+        if battleship.collide_boss(boss):
+            Fire.occur_explosion(screen, battleship.rect.x, battleship.rect.y)
+            rocks.empty()
+            battleship.reset()
+            destroyed_rock = 0
+            rocks_count = 0
+            count_miss = 0
+            fire_num = 1
+            game_framework.change_state(title_state)
+            sleep(1)
 
 # 아이템을 먹었을 때 발사체 수 증가
     for item in items:
@@ -122,7 +130,7 @@ def enter():
     fires = pygame.sprite.Group()
     rocks = pygame.sprite.Group()
     items = pygame.sprite.Group()
-    boss = Boss()
+    boss = pygame.sprite.Group()
 
 def exit():
     global battleship, fires, rocks, boss
