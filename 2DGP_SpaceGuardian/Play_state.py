@@ -98,7 +98,11 @@ def game_logic():
         sleep(1)
 
     if destroyed_rock >= 10 and rocks_count == 0:
-        if boss.collide(fires):
+
+        boss_c = Boss(100,  10, 1)
+        boss.add(boss_c)
+
+        if boss_c.collide(fires):
             fire.kill()
 
         if battleship.collide_boss(boss):
@@ -130,7 +134,7 @@ def enter():
     fires = pygame.sprite.Group()
     rocks = pygame.sprite.Group()
     items = pygame.sprite.Group()
-    boss = pygame.sprite.Group()
+    boss = pygame.sprite.GroupSingle()
 
 def exit():
     global battleship, fires, rocks, boss
@@ -211,11 +215,11 @@ def handle_events():
 
 
 def update():
+    game_logic()
     battleship.update()
     fires.update()
     rocks.update()
     items.update()
-    game_logic()
     if destroyed_rock >= 10 and rocks_count == 0:
         boss.update()
 
