@@ -14,8 +14,4 @@ class Item(pygame.sprite.Sprite):
     def update(self):
         self.rect.y += self.speed
 
-    # def collide(self, sprites):
-    #     for sprite in sprites:
-    #         if pygame.sprite.collide_rect(self, battleship):
-    #             fire_num += 1
-    #             return sprite
+

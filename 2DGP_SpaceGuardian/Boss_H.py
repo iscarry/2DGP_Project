@@ -8,7 +8,7 @@ class Boss(pygame.sprite.Sprite):
         self.rect.x = xpos
         self.rect.y = ypos
         self.speed = speed
-        self.HP = 30
+
 
     def update(self):
         self.rect.y += self.speed
@@ -21,5 +21,18 @@ class Boss(pygame.sprite.Sprite):
         for sprite in sprites:
             if pygame.sprite.collide_rect(self, sprite):
                 return sprite
+    def collide_battleship(self, sprite):
+
+            if pygame.sprite.collide_rect(self, sprite):
+                return sprite
 
 
+    def occur_explosion(screen, x, y):
+
+        explosion_image = pygame.image.load('sprite/Boss_explosion.png')
+
+        explosion_rect = explosion_image.get_rect()
+        explosion_rect.x = x
+        explosion_rect.y = y
+        screen.blit(explosion_image, explosion_rect)
+        pygame.display.flip()

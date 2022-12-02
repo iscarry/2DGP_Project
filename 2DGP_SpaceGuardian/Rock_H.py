@@ -18,7 +18,7 @@ class Rock(pygame.sprite.Sprite):
         elif self.image == 2:
             self.image = self.U_Rock
         else:
-            if random.randint(1, 2) == 1:
+            if random.randint(1, 5) == 1:
                 self.image = self.G_rock
             else:
                 self.image = self.rock01
