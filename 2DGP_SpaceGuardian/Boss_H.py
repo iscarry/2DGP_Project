@@ -14,8 +14,8 @@ class Boss(pygame.sprite.Sprite):
         self.rect.y += self.speed
 
 
-    # def draw(self, screen):
-    #     screen.blit(self.image, self.rect)
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
 
     def collide(self, sprites):
         for sprite in sprites:

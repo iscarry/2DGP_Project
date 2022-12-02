@@ -45,7 +45,6 @@ class BattleShip(pygame.sprite.Sprite):
         self.rect.y = (SCREEN_HEIGHT * 0.8)
 
     def update(self):
-
         # 상태를 처리
         if self.state == 0:
             count = 1
@@ -119,8 +118,8 @@ class BattleShip(pygame.sprite.Sprite):
             if pygame.sprite.collide_rect(self, sprite):
                 return sprite
 
-    def collide_boss(self, sprites):
-        for sprite in sprites:
-            if pygame.sprite.collide_rect(self, sprite):
-                return sprite
+    def collide_boss(self, sprite):
+        #for sprite in sprites:
+        if pygame.sprite.collide_rect(self, sprite):
+            return sprite
 

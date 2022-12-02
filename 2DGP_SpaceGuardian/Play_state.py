@@ -19,11 +19,7 @@ WHITE = (200, 200, 200)
 YELLOW = (250, 250, 50)
 RED = (250, 50, 50)
 FPS = 60
-battleship = None
-fires = None
-rocks = None
-items = None
-boss = None
+
 Occur_Rock = 1
 Rock_Speed = 1
 Max_Speed = 2
@@ -33,16 +29,17 @@ fire_num = 1
 unit_fall = True
 rocks_count = 0
 
+battleship = None
+fires = None
+rocks = None
+items = None
+boss = None
 
 def draw_text(screen, text, font, x, y, color):
     text_obj = font.render(text, True, color)
     text_rect = text_obj.get_rect()
     text_rect.center = x, y
     screen.blit(text_obj, text_rect)
-
-
-
-
 
 def game_logic():
     global battleship, Occur_Rock, Rock_Speed, Max_Speed, destroyed_rock, count_miss, fire_num, unit_fall, boss, rocks_count
@@ -98,12 +95,15 @@ def game_logic():
         sleep(1)
 
     if destroyed_rock >= 10 and rocks_count == 0:
-
-        boss_c = Boss(100,  10, 1)
-        boss.add(boss_c)
-
-        if boss_c.collide(fires):
+        #boss_c = Boss(100,  10, Rock_Speed)
+        #boss.add(boss_c)
+        if boss.collide(fires):
             fire.kill()
+            boss.HP -= 1
+
+            if boss.HP == 0:
+
+
 
         if battleship.collide_boss(boss):
             Fire.occur_explosion(screen, battleship.rect.x, battleship.rect.y)
@@ -134,8 +134,8 @@ def enter():
     fires = pygame.sprite.Group()
     rocks = pygame.sprite.Group()
     items = pygame.sprite.Group()
-    boss = pygame.sprite.GroupSingle()
-
+    #boss = pygame.sprite.GroupSingle()
+    boss = Boss(100, 10, Rock_Speed)
 def exit():
     global battleship, fires, rocks, boss
     del battleship
@@ -215,14 +215,16 @@ def handle_events():
 
 
 def update():
-    game_logic()
+    global battleship, fires, rocks, items, boss
+
+
     battleship.update()
     fires.update()
     rocks.update()
     items.update()
     if destroyed_rock >= 10 and rocks_count == 0:
         boss.update()
-
+    game_logic()
 
 def draw_world():
     global destroyed_rock, count_miss, unit_fall
