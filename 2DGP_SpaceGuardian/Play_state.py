@@ -12,6 +12,7 @@ from Rock_H import Rock
 from Item_H import Item
 from Boss_H import Boss
 
+pygame.init()
 # 정의
 SCREEN_WIDTH = 480
 SCREEN_HEIGHT = 640
@@ -24,12 +25,13 @@ FPS = 60
 
 Occur_Rock = 1
 Rock_Speed = 1
-Max_Speed = 2
+Max_Speed = 5
 destroyed_rock = 0
 count_miss = 0
 fire_num = 1
 unit_fall = True
 rocks_count = 0
+
 
 battleship = BattleShip()
 fires = pygame.sprite.Group()
@@ -37,6 +39,10 @@ rocks = pygame.sprite.Group()
 items = pygame.sprite.Group()
 boss = Boss(100, 10, Rock_Speed)
 Boss_HP = 30
+
+game_sound = pygame.mixer.Sound("Simple Plan-10-Last One Standing.mp3")
+game_sound.play()
+
 
 def draw_text(screen, text, font, x, y, color):
     text_obj = font.render(text, True, color)
@@ -117,6 +123,7 @@ def game_logic():
                 unit_fall = True
                 game_framework.change_state(Clear_state)
                 sleep(1)
+
         if boss.collide_battleship(battleship):
             Fire.occur_explosion(screen, battleship.rect.x, battleship.rect.y)
             rocks.empty()
@@ -140,7 +147,6 @@ def game_logic():
 
 
 
-pygame.init()
 
 def enter():
     global battleship, fires, rocks, items, boss
